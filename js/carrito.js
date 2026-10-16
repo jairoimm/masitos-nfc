@@ -17,15 +17,20 @@ function guardarCarrito(carrito) {
 
 function agregarAlCarrito(producto) {
     const carrito = obtenerCarrito();
-    const index = carrito.findIndex(item => item.id === producto.id);
+    const ingredientesStr = producto.ingredientesSeleccionados && producto.ingredientesSeleccionados.length > 0 ? JSON.stringify(producto.ingredientesSeleccionados) : "";
+    const cartItemId = producto.id + (ingredientesStr ? "_" + btoa(encodeURIComponent(ingredientesStr)) : "");
+
+    const index = carrito.findIndex(item => item.cartItemId === cartItemId || (!item.cartItemId && item.id === producto.id && !ingredientesStr));
 
     if (index !== -1) {
         carrito[index].cantidad += 1;
     } else {
         carrito.push({
+            cartItemId: cartItemId,
             id: producto.id,
             nombre: producto.nombre,
             precio: producto.precio,
+            ingredientesSeleccionados: producto.ingredientesSeleccionados || [],
             cantidad: 1
         });
     }
@@ -36,9 +41,9 @@ function agregarAlCarrito(producto) {
     mostrarToast(`¡${producto.nombre} agregado al carrito!`);
 }
 
-function cambiarCantidad(id, delta) {
+function cambiarCantidad(cartItemId, delta) {
     const carrito = obtenerCarrito();
-    const index = carrito.findIndex(item => item.id === id);
+    const index = carrito.findIndex(item => item.cartItemId === cartItemId || item.id === cartItemId);
 
     if (index !== -1) {
         carrito[index].cantidad += delta;
@@ -50,9 +55,9 @@ function cambiarCantidad(id, delta) {
     guardarCarrito(carrito);
 }
 
-function eliminarDelCarrito(id) {
+function eliminarDelCarrito(cartItemId) {
     let carrito = obtenerCarrito();
-    carrito = carrito.filter(item => item.id !== id);
+    carrito = carrito.filter(item => item.cartItemId !== cartItemId && item.id !== cartItemId);
     guardarCarrito(carrito);
 }
 

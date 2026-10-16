@@ -56,7 +56,7 @@ function renderizarProductos(lista) {
                 <p class="product-desc">${prod.descripcion}</p>
                 <div class="product-footer">
                     <span class="product-price">$${prod.precio.toLocaleString('es-CL')}</span>
-                    <button class="add-btn" onclick='agregarAlCarrito(${JSON.stringify(prod)})'>Agregar</button>
+                    <button class="add-btn" onclick='manejarBotonAgregar(${JSON.stringify(prod)})'>Agregar</button>
                 </div>
             </div>
         </div>
@@ -78,7 +78,7 @@ function inicializarPromociones() {
                 <p class="product-desc">${promo.descripcion}</p>
                 <div class="product-footer">
                     <span class="product-price">$${promo.precio.toLocaleString('es-CL')}</span>
-                    <button class="add-btn" onclick='agregarAlCarrito(${JSON.stringify(promo)})'>Agregar</button>
+                    <button class="add-btn" onclick='manejarBotonAgregar(${JSON.stringify(promo)})'>Agregar</button>
                 </div>
             </div>
         </div>
@@ -86,12 +86,123 @@ function inicializarPromociones() {
 }
 
 /* ==========================================
-   3. VISTA DE CARRITO Y CHECKOUT WHATSAPP
+   3. MODAL DE INGREDIENTES INTERACTIVO
+   ========================================== */
+function manejarBotonAgregar(prod) {
+    const categoriasConIngredientes = ['pizza', 'fajita', 'empanada', 'supremas'];
+    const requiereIngredientes = categoriasConIngredientes.includes(prod.categoria) || prod.nombre.toLowerCase().includes('armalo') || prod.nombre.toLowerCase().includes('armala');
+
+    if (requiereIngredientes && typeof ingredientesDisponibles !== 'undefined') {
+        abrirModalIngredientes(prod);
+    } else {
+        agregarAlCarrito(prod);
+    }
+}
+
+function abrirModalIngredientes(prod) {
+    let modalContainer = document.getElementById("ingredient-modal-container");
+    if (!modalContainer) {
+        modalContainer = document.createElement("div");
+        modalContainer.id = "ingredient-modal-container";
+        document.body.appendChild(modalContainer);
+    }
+
+    let tituloInstruccion = "Selecciona tus ingredientes a elección:";
+    if (prod.categoria === 'pizza' || prod.categoria === 'fajita') {
+        tituloInstruccion = "Selecciona tus ingredientes (Proteínas y Vegetales):";
+    } else if (prod.categoria === 'empanada') {
+        tituloInstruccion = "Selecciona tus ingredientes para la empanada:";
+    } else if (prod.categoria === 'supremas') {
+        tituloInstruccion = "Selecciona 1 ingrediente adicional para tus Supremas:";
+    }
+
+    modalContainer.innerHTML = `
+        <div class="modal-overlay" id="modal-ingredientes">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3 class="modal-title">Personalizar: ${prod.nombre}</h3>
+                    <button class="modal-close" onclick="cerrarModalIngredientes()">&times;</button>
+                </div>
+                <div class="modal-instructions">
+                    <i class="fa-solid fa-info-circle"></i> ${tituloInstruccion}
+                </div>
+                
+                ${ingredientesDisponibles.proteinas && ingredientesDisponibles.proteinas.length > 0 ? `
+                <div>
+                    <div class="ingredient-section-title">Proteínas / Carnes</div>
+                    <div class="ingredient-options">
+                        ${ingredientesDisponibles.proteinas.map(ing => `
+                            <label class="ingredient-label">
+                                <input type="checkbox" name="ingrediente" value="${ing}"> ${ing}
+                            </label>
+                        `).join("")}
+                    </div>
+                </div>
+                ` : ''}
+
+                ${ingredientesDisponibles.vegetales && ingredientesDisponibles.vegetales.length > 0 ? `
+                <div>
+                    <div class="ingredient-section-title">Vegetales / Varios</div>
+                    <div class="ingredient-options">
+                        ${ingredientesDisponibles.vegetales.map(ing => `
+                            <label class="ingredient-label">
+                                <input type="checkbox" name="ingrediente" value="${ing}"> ${ing}
+                            </label>
+                        `).join("")}
+                    </div>
+                </div>
+                ` : ''}
+
+                ${ingredientesDisponibles.quesosCrema && ingredientesDisponibles.quesosCrema.length > 0 ? `
+                <div>
+                    <div class="ingredient-section-title">Quesos y Cremas</div>
+                    <div class="ingredient-options">
+                        ${ingredientesDisponibles.quesosCrema.map(ing => `
+                            <label class="ingredient-label">
+                                <input type="checkbox" name="ingrediente" value="${ing}"> ${ing}
+                            </label>
+                        `).join("")}
+                    </div>
+                </div>
+                ` : ''}
+
+                <button class="main-btn btn-primary-red" style="margin-top: 10px; justify-content: center;" onclick='confirmarIngredientes(${JSON.stringify(prod)})'>
+                    Confirmar y Agregar al Carrito
+                </button>
+            </div>
+        </div>
+    `;
+}
+
+function cerrarModalIngredientes() {
+    const modalContainer = document.getElementById("ingredient-modal-container");
+    if (modalContainer) modalContainer.innerHTML = "";
+}
+
+function confirmarIngredientes(prod) {
+    const checkboxes = document.querySelectorAll("input[name='ingrediente']:checked");
+    const seleccionados = Array.from(checkboxes).map(cb => cb.value);
+
+    if (seleccionados.length === 0) {
+        alert("Por favor selecciona al menos un ingrediente.");
+        return;
+    }
+
+    const productoPersonalizado = {
+        ...prod,
+        ingredientesSeleccionados: seleccionados
+    };
+
+    agregarAlCarrito(productoPersonalizado);
+    cerrarModalIngredientes();
+}
+
+/* ==========================================
+   4. VISTA DE CARRITO Y CHECKOUT WHATSAPP
    ========================================== */
 function inicializarCarritoView() {
     renderizarItemsCarrito();
 
-    // Manejar visibilidad de dirección según tipo de entrega
     const tipoEntregaRadios = document.querySelectorAll("input[name='tipoEntrega']");
     const grupoDireccion = document.getElementById("grupo-direccion");
 
@@ -107,7 +218,6 @@ function inicializarCarritoView() {
         });
     });
 
-    // Manejar envío de pedido
     const form = document.getElementById("checkout-form");
     if (form) {
         form.addEventListener("submit", (e) => {
@@ -140,22 +250,30 @@ function renderizarItemsCarrito() {
     if (emptyState) emptyState.style.display = "none";
     if (formSection) formSection.style.display = "block";
 
-    container.innerHTML = carrito.map(item => `
+    container.innerHTML = carrito.map(item => {
+        const itemId = item.cartItemId || item.id;
+        const ingredientesHtml = item.ingredientesSeleccionados && item.ingredientesSeleccionados.length > 0 
+            ? `<div style="font-size: 0.78rem; color: #ff9998; margin-top: 3px;">Ingredientes: ${item.ingredientesSeleccionados.join(', ')}</div>` 
+            : '';
+
+        return `
         <div class="cart-item-card">
             <div class="cart-item-details">
                 <span class="cart-item-title">${item.nombre}</span>
+                ${ingredientesHtml}
                 <span class="cart-item-price">$${(item.precio * item.cantidad).toLocaleString('es-CL')} ($${item.precio.toLocaleString('es-CL')} c/u)</span>
             </div>
             <div class="cart-item-controls">
-                <button class="qty-btn" onclick="cambiarCantidad('${item.id}', -1)">-</button>
+                <button class="qty-btn" onclick="cambiarCantidad('${itemId}', -1); renderizarItemsCarrito();">-</button>
                 <span class="qty-number">${item.cantidad}</span>
-                <button class="qty-btn" onclick="cambiarCantidad('${item.id}', 1)">+</button>
-                <button class="remove-item-btn" onclick="eliminarDelCarrito('${item.id}'); renderizarItemsCarrito();" title="Eliminar">
+                <button class="qty-btn" onclick="cambiarCantidad('${itemId}', 1); renderizarItemsCarrito();">+</button>
+                <button class="remove-item-btn" onclick="eliminarDelCarrito('${itemId}'); renderizarItemsCarrito();" title="Eliminar">
                     <i class="fas fa-trash-alt"></i>
                 </button>
             </div>
         </div>
-    `).join("");
+    `;
+    }).join("");
 
     const total = calcularTotalCarrito();
     if (subtotalEl) subtotalEl.textContent = `$${total.toLocaleString('es-CL')}`;
@@ -186,6 +304,9 @@ function enviarPedidoWhatsApp() {
     mensaje += `\nPedido:\n`;
     carrito.forEach(item => {
         mensaje += `▪ ${item.nombre} x${item.cantidad}\n`;
+        if (item.ingredientesSeleccionados && item.ingredientesSeleccionados.length > 0) {
+            mensaje += `  Ingredientes: ${item.ingredientesSeleccionados.join(', ')}\n`;
+        }
     });
 
     mensaje += `\nTotal estimado: $${total.toLocaleString('es-CL')}\n`;
@@ -196,7 +317,6 @@ function enviarPedidoWhatsApp() {
 
     mensaje += `\nGracias.`;
 
-    // Número de WhatsApp de la pizzería (configurable, ej: 56912345678)
     const telefonoWhatsApp = "56936795602";
     const urlWhatsApp = `https://wa.me/${telefonoWhatsApp}?text=${encodeURIComponent(mensaje)}`;
 
