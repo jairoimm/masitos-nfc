@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Carrito y Pedido - Pizzería Masitos</title>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Estilos personalizados -->
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+
+    <div class="phone-container">
+
+        <!-- Header de la Página -->
+        <header class="page-header">
+            <a href="menu.html" class="back-btn" title="Volver al Menú">
+                <i class="fa-solid fa-chevron-left"></i>
+            </a>
+            <h1 class="page-title">Tu Carrito & Pedido</h1>
+            <div></div> <!-- Spacer -->
+        </header>
+
+        <div class="cart-section">
+            
+            <!-- Estado Carrito Vacío -->
+            <div id="cart-empty" style="text-align: center; padding: 40px 20px; display: none;">
+                <i class="fa-solid fa-shopping-basket" style="font-size: 3.5rem; color: #444; margin-bottom: 15px;"></i>
+                <h3 style="font-size: 1.2rem; margin-bottom: 8px;">Tu carrito está vacío</h3>
+                <p style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 20px;">Agrega deliciosas pizzas, empanadas o promos para comenzar.</p>
+                <a href="menu.html" class="main-btn btn-primary-red" style="justify-content: center;">Ver Menú</a>
+            </div>
+
+            <!-- Lista de items seleccionados -->
+            <div class="cart-items-list" id="cart-items-container">
+                <!-- Inyectado por JS -->
+            </div>
+
+            <!-- Sección de Formulario y Checkout (se oculta si carrito está vacío) -->
+            <div id="checkout-section" style="display: flex; flex-direction: column; gap: 20px;">
+                
+                <!-- Formulario de Datos -->
+                <form class="checkout-form" id="checkout-form">
+                    <h3 style="font-size: 1.05rem; margin-bottom: 4px; border-bottom: 1px solid var(--border-color); padding-bottom: 8px;">Datos del Cliente</h3>
+                    
+                    <div class="form-group">
+                        <label class="form-label" for="nombre-cliente">Nombre y Apellido *</label>
+                        <input type="text" id="nombre-cliente" class="form-input" placeholder="Ej. Juan Pérez" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Tipo de Entrega *</label>
+                        <div class="radio-group">
+                            <label class="radio-label">
+                                <input type="radio" name="tipoEntrega" value="Delivery" checked> Delivery
+                            </label>
+                            <label class="radio-label">
+                                <input type="radio" name="tipoEntrega" value="Retiro en local"> Retiro en local
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="form-group" id="grupo-direccion">
+                        <label class="form-label" for="direccion">Dirección de Entrega *</label>
+                        <input type="text" id="direccion" class="form-input" placeholder="Ej. Av. Principal 123, Depto 4B" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label" for="comentarios">Comentarios adicionales (Opcional)</label>
+                        <textarea id="comentarios" class="form-textarea" rows="2" placeholder="Ej. Sin cebolla, tocar timbre al llegar..."></textarea>
+                    </div>
+
+                    <!-- Resumen del Pedido -->
+                    <div class="cart-summary" style="margin-top: 10px;">
+                        <div class="summary-row">
+                            <span>Subtotal</span>
+                            <span id="summary-subtotal">$0</span>
+                        </div>
+                        <div class="summary-row total">
+                            <span>Total Estimado</span>
+                            <span id="summary-total">$0</span>
+                        </div>
+                    </div>
+
+                    <!-- Botón Enviar WhatsApp -->
+                    <button type="submit" class="whatsapp-btn">
+                        <i class="fa-brands fa-whatsapp" style="font-size: 1.4rem;"></i>
+                        <span>Enviar Pedido por WhatsApp</span>
+                    </button>
+                </form>
+
+            </div>
+
+        </div>
+
+        <!-- Footer / Gorro de Chef -->
+        <footer class="app-footer">
+            <div class="chef-icon">
+                <i class="fa-solid fa-hat-chef"></i>
+            </div>
+            <div class="italia-stripes">
+                <div class="stripe-green"></div>
+                <div class="stripe-white"></div>
+                <div class="stripe-red"></div>
+            </div>
+        </footer>
+
+    </div>
+
+    <!-- Scripts -->
+    <script src="js/data.js"></script>
+    <script src="js/carrito.js"></script>
+    <script src="js/app.js"></script>
+</body>
+</html>

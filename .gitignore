@@ -1,0 +1,22 @@
+# VS Code
+.vscode/
+
+# Sistema operativo
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+
+# Archivos temporales
+*.tmp
+
+# Configuraciones locales
+.env
+
+# Python (por si agregas scripts después)
+__pycache__/
+*.pyc
+
+# Node (por si migras el proyecto)
+node_modules/
