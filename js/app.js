@@ -200,6 +200,10 @@ function enviarPedidoWhatsApp() {
     const telefonoWhatsApp = "56936795602";
     const urlWhatsApp = `https://wa.me/${telefonoWhatsApp}?text=${encodeURIComponent(mensaje)}`;
 
-    // Vaciar carrito opcionalmente o abrir WhatsApp
+    // Abrir WhatsApp
     window.open(urlWhatsApp, "_blank");
+
+    // Limpiar carrito y volver al inicio
+    guardarCarrito([]);
+    window.location.href = "index.html";
 }
